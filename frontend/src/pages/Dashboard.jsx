@@ -3,253 +3,582 @@ import {
     useParams
 } from "react-router-dom";
 
-import { useEffect, useState } from "react";
+import {
+    useEffect,
+    useState
+} from "react";
 
 import api from "../api/client";
 
+import NewIssueModal from "../components/NewIssueModal";
+
+
 export default function Dashboard() {
 
-    const { projectId } = useParams();
 
-    const [issues, setIssues] = useState([]);
+    const {
+        projectId
+    } = useParams();
 
-    useEffect(() => {
+
+
+    const [
+        issues,
+        setIssues
+    ] = useState([]);
+
+
+
+    const [
+        showModal,
+        setShowModal
+    ] = useState(false);
+
+
+
+
+    function loadIssues(){
+
 
         api.get(
             `/issues/project/${projectId}`
         )
-        .then(response => {
-            setIssues(response.data);
-        })
-        .catch(console.error);
 
-    }, [projectId]);
+        .then(response=>{
+
+            setIssues(
+                response.data
+            );
+
+        })
+
+        .catch(error=>{
+
+            console.error(
+                "LOAD ISSUES ERROR:",
+                error.response?.data || error
+            );
+
+        });
+
+
+    }
+
+
+
+
+    useEffect(()=>{
+
+
+        if(projectId){
+
+            loadIssues();
+
+        }
+
+
+    },[projectId]);
+
+
+
+
 
     const openIssues =
-        issues.filter(
-            issue =>
-                issue.status !== "Done" &&
-                issue.status !== "Canceled"
-        );
+    issues.filter(issue=>
+
+        issue.status !== "Done"
+        &&
+        issue.status !== "Canceled"
+
+    );
+
+
+
 
     const inProgress =
-        issues.filter(
-            issue =>
-                issue.status === "In Progress"
-        );
+    issues.filter(issue=>
+
+        issue.status === "In Progress"
+
+    );
+
+
+
 
     const overdue =
-        openIssues.filter(
-            issue =>
-                issue.due_date &&
-                new Date(issue.due_date) < new Date()
-        );
+    openIssues.filter(issue=>{
 
-    return (
-        <div>
 
-            <div className="page-header">
+        if(!issue.due_date)
+            return false;
 
-                <div>
 
-                    <div className="breadcrumb">
-                        Acme Inc /
-                        Website Redesign /
-                        Dashboard
-                    </div>
+        return new Date(issue.due_date)
+        <
+        new Date();
 
-                    <h1>
-                        Website Redesign
-                    </h1>
 
-                    <p>
-                        Relaunch of the marketing site
-                    </p>
+    });
 
-                </div>
 
-                <button className="primary-button">
-                    New issue
-                </button>
 
-            </div>
 
-            <div className="stat-grid">
 
-                <StatCard
-                    title="OPEN ISSUES"
-                    value={openIssues.length}
-                />
+return (
 
-                <StatCard
-                    title="IN PROGRESS"
-                    value={inProgress.length}
-                />
+<div>
 
-                <StatCard
-                    title="OVERDUE"
-                    value={overdue.length}
-                />
 
-                <StatCard
-                    title="DONE THIS WEEK"
-                    value="13"
-                />
 
-            </div>
+<div className="page-header">
 
-            <div className="dashboard-grid">
 
-                <section className="panel">
+<div>
 
-                    <h2>
-                        Issues by status
-                    </h2>
 
-                    <StatusBar
-                        name="Backlog"
-                        count={14}
-                    />
+<div className="breadcrumb">
 
-                    <StatusBar
-                        name="Todo"
-                        count={12}
-                    />
+Acme Inc /
+Website Redesign /
+Dashboard
 
-                    <StatusBar
-                        name="In Progress"
-                        count={9}
-                    />
+</div>
 
-                    <StatusBar
-                        name="In Review"
-                        count={3}
-                    />
 
-                    <StatusBar
-                        name="Done"
-                        count={21}
-                    />
 
-                </section>
+<h1>
+Website Redesign
+</h1>
 
-                <section className="panel">
 
-                    <h2>
-                        Open issues by assignee
-                    </h2>
+<p>
+Relaunch of the marketing site
+</p>
 
-                    <Workload
-                        name="Priya Sharma"
-                        count={11}
-                    />
 
-                    <Workload
-                        name="Dan Kim"
-                        count={9}
-                    />
 
-                    <Workload
-                        name="Mia Torres"
-                        count={7}
-                    />
+</div>
 
-                    <Workload
-                        name="Sam Ortiz"
-                        count={6}
-                    />
 
-                    <Workload
-                        name="Unassigned"
-                        count={5}
-                    />
 
-                </section>
+<button
 
-            </div>
+className="primary-button"
 
-            <section className="panel">
-
-                <h2>
-                    Recently updated
-                </h2>
-
-                {issues.slice(0, 10).map(issue => (
-
-                    <Link
-                        className="recent-item"
-                        key={issue.id}
-                        to={`/projects/${projectId}/issues/${issue.id}`}
-                    >
-                        <strong>
-                            {issue.issue_key}
-                        </strong>
-
-                        <span>
-                            {issue.title}
-                        </span>
-
-                        <span>
-                            {issue.status}
-                        </span>
-                    </Link>
-
-                ))}
-
-            </section>
-
-        </div>
-    );
+onClick={()=>
+setShowModal(true)
 }
 
-function StatCard({ title, value }) {
+>
 
-    return (
-        <div className="stat-card">
-            <small>{title}</small>
-            <strong>{value}</strong>
-        </div>
-    );
+New issue
+
+</button>
+
+
+
+</div>
+
+
+
+
+{
+showModal &&
+
+<NewIssueModal
+
+projectId={projectId}
+
+onClose={()=>
+setShowModal(false)
 }
 
-function StatusBar({ name, count }) {
+onCreated={()=>
 
-    return (
-        <div className="status-row">
+api.get(
+`/issues/project/${projectId}`
+)
 
-            <span>
-                {name}
-            </span>
+.then(res=>
 
-            <div className="bar">
-                <div
-                    style={{
-                        width: `${count * 3}%`
-                    }}
-                />
-            </div>
+setIssues(res.data)
 
-            <strong>
-                {count}
-            </strong>
+)
 
-        </div>
-    );
 }
 
-function Workload({ name, count }) {
+/>
 
-    return (
-        <div className="workload">
+}
 
-            <span>
-                {name}
-            </span>
 
-            <strong>
-                {count}
-            </strong>
 
-        </div>
-    );
+
+
+
+
+<div className="stat-grid">
+
+
+<StatCard
+
+title="OPEN ISSUES"
+
+value={
+openIssues.length
+}
+
+/>
+
+
+
+<StatCard
+
+title="IN PROGRESS"
+
+value={
+inProgress.length
+}
+
+/>
+
+
+
+<StatCard
+
+title="OVERDUE"
+
+value={
+overdue.length
+}
+
+/>
+
+
+
+<StatCard
+
+title="DONE THIS WEEK"
+
+value="0"
+
+/>
+
+
+</div>
+
+
+
+
+
+
+<div className="dashboard-grid">
+
+
+<section className="panel">
+
+
+<h2>
+Issues by status
+</h2>
+
+
+
+<StatusBar
+
+name="Backlog"
+
+count={
+issues.filter(
+i=>i.status==="Backlog"
+).length
+}
+
+/>
+
+
+
+<StatusBar
+
+name="Todo"
+
+count={
+issues.filter(
+i=>i.status==="Todo"
+).length
+}
+
+/>
+
+
+
+<StatusBar
+
+name="In Progress"
+
+count={
+inProgress.length
+}
+
+/>
+
+
+
+<StatusBar
+
+name="Done"
+
+count={
+issues.filter(
+i=>i.status==="Done"
+).length
+}
+
+/>
+
+
+
+</section>
+
+
+
+
+
+
+
+<section className="panel">
+
+
+<h2>
+Open issues by assignee
+</h2>
+
+
+
+{
+
+openIssues.map(issue=>(
+
+
+<Workload
+
+key={issue.id}
+
+name={
+issue.assignee_name ||
+"Unassigned"
+}
+
+count={1}
+
+/>
+
+
+))
+
+}
+
+
+
+</section>
+
+
+
+</div>
+
+
+
+
+
+
+
+<section className="panel">
+
+
+<h2>
+Recently updated
+</h2>
+
+
+
+{
+
+issues
+.slice(0,10)
+.map(issue=>(
+
+
+<Link
+
+key={issue.id}
+
+className="recent-item"
+
+to={
+`/projects/${projectId}/issues/${issue.id}`
+}
+
+>
+
+
+<strong>
+
+{issue.issue_key}
+
+</strong>
+
+
+
+<span>
+
+{issue.title}
+
+</span>
+
+
+
+<span>
+
+{issue.status}
+
+</span>
+
+
+
+</Link>
+
+
+
+))
+
+}
+
+
+
+</section>
+
+
+
+
+</div>
+
+);
+
+
+}
+
+
+
+
+
+function StatCard({
+title,
+value
+}){
+
+
+return (
+
+<div className="stat-card">
+
+<small>
+{title}
+</small>
+
+
+<strong>
+{value}
+</strong>
+
+
+</div>
+
+);
+
+
+}
+
+
+
+
+
+
+
+function StatusBar({
+name,
+count
+}){
+
+
+return (
+
+<div className="status-row">
+
+
+<span>
+{name}
+</span>
+
+
+
+<div className="bar">
+
+<div
+
+style={{
+
+width:`${count*5}%`
+
+}}
+
+/>
+
+</div>
+
+
+
+<strong>
+{count}
+</strong>
+
+
+
+</div>
+
+);
+
+
+}
+
+
+
+
+
+
+
+function Workload({
+name,
+count
+}){
+
+
+return (
+
+<div className="workload">
+
+<span>
+{name}
+</span>
+
+
+<strong>
+{count}
+</strong>
+
+
+</div>
+
+);
+
+
 }

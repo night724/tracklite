@@ -528,7 +528,58 @@ textarea {
     justify-content: center;
     align-items: center;
 }
+.modal-background{
 
+position:fixed;
+
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+background:rgba(0,0,0,0.5);
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+}
+
+
+.modal-box{
+
+background:white;
+
+padding:30px;
+
+width:400px;
+
+border-radius:10px;
+
+}
+
+
+.modal-box input,
+.modal-box textarea,
+.modal-box select{
+
+width:100%;
+
+margin-bottom:15px;
+
+padding:10px;
+
+}
+
+
+.modal-box textarea{
+
+height:100px;
+
+}
 .modal {
     width: 450px;
     background: white;

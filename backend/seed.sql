@@ -22,7 +22,13 @@ VALUES
     'sam@acme.com',
     '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC7S3D6Wz0kK'
 );
-
+INSERT INTO notifications
+(title,message)
+VALUES
+(
+'Welcome to TrackLite',
+'Your account was created successfully'
+);
 INSERT INTO projects(
     organization_id,
     name,

@@ -36,7 +36,18 @@ CREATE TABLE projects (
     archived BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE notifications
+(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
+    title VARCHAR(255) NOT NULL,
+
+    message TEXT,
+
+    user_id UUID,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 CREATE TABLE project_members (
     project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,

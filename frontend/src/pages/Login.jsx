@@ -1,156 +1,110 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api/client";
 
-import { useAuth } from "../context/AuthContext";
 
-export default function Login() {
+export default function Login(){
 
     const navigate = useNavigate();
 
-    const { login } = useAuth();
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [email,setEmail] = useState("");
+    const [password,setPassword] = useState("");
+    const [error,setError] = useState("");
 
-    const [showPassword, setShowPassword] =
-        useState(false);
 
-    const [error, setError] = useState("");
-
-    const [loading, setLoading] = useState(false);
-
-    const emailValid =
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-    const canLogin =
-        emailValid &&
-        password.length > 0;
-
-    async function handleSubmit(e) {
+    async function handleLogin(e){
 
         e.preventDefault();
 
-        if (!canLogin) return;
 
-        setError("");
-        setLoading(true);
+        try{
 
-        try {
-
-            await login(email, password);
-
-            navigate("/projects/1/dashboard");
-
-        } catch (error) {
-
-            setError(
-                "Email or password is incorrect."
+            const res = await api.post(
+                "/auth/login",
+                {
+                    email,
+                    password
+                }
             );
 
-        } finally {
 
-            setLoading(false);
+            localStorage.setItem(
+                "token",
+                res.data.token
+            );
+
+
+            navigate(
+                "/projects"
+            );
+
+
+        }catch(err){
+
+            console.log(err);
+
+            setError(
+                "Email or password incorrect"
+            );
+
         }
+
     }
 
+
+
     return (
+
         <div className="login-page">
 
-            <div className="login-card">
 
-                <div className="logo">
-                    TrackLite
-                </div>
+            <form
+                onSubmit={handleLogin}
+            >
 
-                <h1>Log in to TrackLite</h1>
+                <h1>
+                    TrackLite Login
+                </h1>
 
-                <p>
-                    Fast, simple project tracking
-                </p>
 
-                {error && (
-                    <div className="error">
+                {
+                    error &&
+                    <p>
                         {error}
-                    </div>
-                )}
+                    </p>
+                }
 
-                <form onSubmit={handleSubmit}>
 
-                    <label>Email</label>
+                <input
+                    placeholder="Email"
+                    value={email}
+                    onChange={
+                        e=>setEmail(e.target.value)
+                    }
+                />
 
-                    <input
-                        type="email"
-                        value={email}
-                        placeholder="you@company.com"
-                        onChange={(e) =>
-                            setEmail(e.target.value)
-                        }
-                    />
 
-                    <label>Password</label>
+                <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={
+                        e=>setPassword(e.target.value)
+                    }
+                />
 
-                    <div className="password-input">
 
-                        <input
-                            type={
-                                showPassword
-                                    ? "text"
-                                    : "password"
-                            }
-                            value={password}
-                            placeholder="Password"
-                            onChange={(e) =>
-                                setPassword(e.target.value)
-                            }
-                        />
-
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setShowPassword(!showPassword)
-                            }
-                        >
-                            {showPassword ? "Hide" : "Show"}
-                        </button>
-
-                    </div>
-
-                    <a href="#">
-                        Forgot password?
-                    </a>
-
-                    <button
-                        className="primary-button"
-                        disabled={!canLogin || loading}
-                    >
-                        {loading
-                            ? "Logging in..."
-                            : "Log in"}
-                    </button>
-
-                </form>
-
-                <div className="divider">
-                    or
-                </div>
-
-                <button
-                    className="oauth-button"
-                    disabled
-                >
-                    Continue with Google
-                    {" "}
-                    (later phase)
+                <button>
+                    Login
                 </button>
 
-                <p>
-                    New to TrackLite?
-                    {" "}
-                    <a href="#">Sign up</a>
-                </p>
 
-            </div>
+            </form>
+
 
         </div>
+
     );
+
 }

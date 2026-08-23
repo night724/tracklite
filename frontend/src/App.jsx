@@ -12,7 +12,9 @@ import Members from "./pages/Members";
 import Dashboard from "./pages/Dashboard";
 import IssueList from "./pages/IssueList";
 import IssueDetail from "./pages/IssueDetail";
-
+import Inbox from "./pages/Inbox";
+import MyIssues from "./pages/MyIssues";
+import Settings from "./pages/Settings";
 import AppLayout from "./layouts/AppLayout";
 
 function ProtectedRoute({ children }) {
@@ -54,12 +56,25 @@ function AppRoutes() {
                         />
                     }
                 />
-
+                <Route
+                    path="/inbox"
+                    element={<Inbox />}
+                />
                 <Route
                     path="members"
                     element={<Members />}
                 />
+                <Route
 
+                    path="/my-issues"
+
+                    element={<MyIssues />}
+
+                />
+                <Route
+                    path="/settings"
+                    element={<Settings />}
+                />
                 <Route
                     path="projects/:projectId/dashboard"
                     element={<Dashboard />}

@@ -1,111 +1,121 @@
 import express from "express";
-import db from "../db.js";
+import pool from "../db.js";
 
 const router = express.Router();
 
 
-router.get("/:projectId", async (req, res) => {
 
-    const { projectId } = req.params;
-
-
-    try {
+router.get("/:projectId", async(req,res)=>{
 
 
-        const open = await db.query(
-            `
-            SELECT COUNT(*)
-            FROM issues
-            WHERE project_id = $1
-            AND deleted_at IS NULL
-            AND status NOT IN ('Done','Canceled')
-            `,
-            [
-                projectId
-            ]
+    const {projectId}=req.params;
+
+
+    try{
+
+
+        const open =
+        await pool.query(
+        `
+        SELECT COUNT(*)
+        FROM issues
+        WHERE project_id=$1
+        AND status NOT IN
+        ('Done','Canceled')
+        `,
+        [projectId]
         );
 
 
 
-        const inProgress = await db.query(
-            `
-            SELECT COUNT(*)
-            FROM issues
-            WHERE project_id = $1
-            AND deleted_at IS NULL
-            AND status = 'In Progress'
-            `,
-            [
-                projectId
-            ]
+        const progress =
+        await pool.query(
+        `
+        SELECT COUNT(*)
+        FROM issues
+        WHERE project_id=$1
+        AND status='In Progress'
+        `,
+        [projectId]
         );
 
 
 
-        const overdue = await db.query(
-            `
-            SELECT COUNT(*)
-            FROM issues
-            WHERE project_id = $1
-            AND deleted_at IS NULL
-            AND status NOT IN ('Done','Canceled')
-            AND due_date < CURRENT_DATE
-            `,
-            [
-                projectId
-            ]
+        const overdue =
+        await pool.query(
+        `
+        SELECT COUNT(*)
+        FROM issues
+        WHERE project_id=$1
+        AND due_date < CURRENT_DATE
+        AND status NOT IN
+        ('Done','Canceled')
+        `,
+        [projectId]
         );
 
 
 
-        const doneThisWeek = await db.query(
-            `
-            SELECT COUNT(*)
-            FROM issues
-            WHERE project_id = $1
-            AND status = 'Done'
-            AND updated_at >= date_trunc('week', CURRENT_DATE)
-            `,
-            [
-                projectId
-            ]
+        const done =
+        await pool.query(
+        `
+        SELECT COUNT(*)
+        FROM issues
+        WHERE project_id=$1
+        AND status='Done'
+        AND updated_at >= CURRENT_DATE - INTERVAL '7 days'
+        `,
+        [projectId]
+        );
+
+
+
+        const issues =
+        await pool.query(
+        `
+        SELECT
+        i.*,
+        u.name as assignee_name
+
+        FROM issues i
+
+        LEFT JOIN users u
+        ON u.id=i.assignee_id
+
+        WHERE i.project_id=$1
+
+        ORDER BY updated_at DESC
+
+        LIMIT 10
+
+        `,
+        [projectId]
         );
 
 
 
         res.json({
 
-            open:
-            Number(open.rows[0].count),
+            stats:{
+                open:open.rows[0].count,
+                progress:progress.rows[0].count,
+                overdue:overdue.rows[0].count,
+                done:done.rows[0].count
+            },
 
-            inProgress:
-            Number(inProgress.rows[0].count),
-
-            overdue:
-            Number(overdue.rows[0].count),
-
-            doneThisWeek:
-            Number(doneThisWeek.rows[0].count)
+            issues:issues.rows
 
         });
 
 
 
-    } catch(error) {
+    }catch(error){
 
-
-        console.error(
-            "DASHBOARD ERROR:",
-            error
-        );
-
+        console.log(error);
 
         res.status(500).json({
-
-            message:error.message
-
+            message:"Dashboard error"
         });
-
 
     }
 

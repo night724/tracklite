@@ -16,14 +16,14 @@ dotenv.config();
 const app = express();
 
 
-// Middleware
 
 app.use(
     cors({
-        origin: "http://localhost:5173",
-        credentials: true
+        origin:"http://localhost:5173",
+        credentials:true
     })
 );
+
 
 
 app.use(
@@ -32,23 +32,22 @@ app.use(
 
 
 
-// Health check
-
 app.get(
     "/api/health",
-    (req, res) => {
+    (req,res)=>{
 
         res.json({
-            success: true,
-            message: "TrackLite API is running"
+
+            success:true,
+
+            message:"TrackLite API is running"
+
         });
 
     }
 );
 
 
-
-// API Routes
 
 app.use(
     "/api/auth",
@@ -81,53 +80,14 @@ app.use(
 
 
 
-// 404 handler
-
-app.use(
-    (req, res) => {
-
-        res.status(404).json({
-
-            message: "API endpoint not found"
-
-        });
-
-    }
-);
-
-
-
-// Error handler
-
-app.use(
-    (error, req, res, next) => {
-
-        console.error(
-            "SERVER ERROR:",
-            error
-        );
-
-
-        res.status(500).json({
-
-            message: "Internal server error"
-
-        });
-
-    }
-);
-
-
-
-// Start server
-
 const PORT =
 process.env.PORT || 5000;
 
 
+
 app.listen(
     PORT,
-    () => {
+    ()=>{
 
         console.log(
             `TrackLite API running on port ${PORT}`

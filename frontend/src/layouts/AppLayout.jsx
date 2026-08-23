@@ -20,11 +20,11 @@ export default function AppLayout() {
 
                 <nav>
 
-                    <Link to="/">
+                    <Link to="/inbox">
                         Inbox
                     </Link>
 
-                    <Link to="/">
+                    <Link to="/my-issues">
                         My Issues
                     </Link>
 
@@ -32,7 +32,7 @@ export default function AppLayout() {
                         Members
                     </Link>
 
-                    <Link to="/">
+                    <Link to="/settings">
                         Settings
                     </Link>
 
@@ -44,7 +44,7 @@ export default function AppLayout() {
 
                 <div className="projects">
 
-                    <Link to="/projects/1/issues">
+                    <Link to="/">
                         <span className="project-color blue"/>
                         Website Redesign
                     </Link>

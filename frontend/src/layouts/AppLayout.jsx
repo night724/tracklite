@@ -130,7 +130,12 @@ export default function AppLayout() {
                     <Link to="/inbox">
                         Inbox
                     </Link>
+                    
+                    <Link to="/projects">
 
+                        Projects
+
+                    </Link>
 
                     <Link to="/my-issues">
                         My Issues
@@ -204,7 +209,6 @@ export default function AppLayout() {
 
                         projects.map(project => (
 
-
                             <Link
 
                                 key={project.id}
@@ -214,7 +218,6 @@ export default function AppLayout() {
                                 }
 
                             >
-
 
                                 <span
 

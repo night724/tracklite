@@ -596,10 +596,7 @@ textarea {
 .members-table-header {
     display: grid;
     grid-template-columns:
-        2.1fr
-        1.8fr
-        1fr
-        .8fr;
+        2.1fr 1.8fr 1fr .8fr;
 
     min-height: 40px;
     align-items: center;
@@ -622,10 +619,7 @@ textarea {
 .member-row {
     display: grid;
     grid-template-columns:
-        2.1fr
-        1.8fr
-        1fr
-        .8fr;
+        2.1fr 1.8fr 1fr .8fr;
 
     min-height: 52px;
 
@@ -746,11 +740,7 @@ textarea {
     display: grid;
 
     grid-template-columns:
-        34px
-        180px
-        1fr
-        65px
-        65px;
+        34px 180px 1fr 65px 65px;
 
     align-items: center;
 
@@ -1066,122 +1056,314 @@ textarea {
     }
 
 }
-.page-header{
 
-display:flex;
-justify-content:space-between;
-margin-bottom:30px;
+.page-header {
 
-}
-
-
-.stat-grid{
-
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:20px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
 
 }
 
 
-.stat-card{
+.stat-grid {
 
-border:1px solid #ddd;
-padding:20px;
-border-radius:12px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
 
 }
 
 
+.stat-card {
 
-.dashboard-grid{
-
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:20px;
-margin-top:20px;
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 12px;
 
 }
 
 
 
-.panel{
+.dashboard-grid {
 
-background:white;
-border:1px solid #ddd;
-border-radius:12px;
-padding:20px;
-
-}
-
-
-
-.status-row{
-
-display:flex;
-align-items:center;
-gap:15px;
-margin:20px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
 
 }
 
 
 
-.bar{
+.panel {
 
-height:10px;
-background:#ddd;
-flex:1;
-border-radius:10px;
-
-}
-
-
-.bar div{
-
-height:100%;
-background:#6670e8;
-border-radius:10px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 20px;
 
 }
 
 
 
-.workload{
+.status-row {
 
-display:flex;
-justify-content:space-between;
-padding:15px 0;
-
-}
-
-
-
-.recent-item{
-
-display:flex;
-justify-content:space-between;
-padding:15px;
-border-bottom:1px solid #eee;
-text-decoration:none;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 20px 0;
 
 }
 
 
 
-.primary-button{
+.bar {
 
-background:#6366df;
-color:white;
-border:0;
-padding:12px 25px;
-border-radius:8px;
+    height: 10px;
+    background: #ddd;
+    flex: 1;
+    border-radius: 10px;
 
 }
+
+
+.bar div {
+
+    height: 100%;
+    background: #6670e8;
+    border-radius: 10px;
+
+}
+
+
+
+.workload {
+
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 0;
+
+}
+
+
+
+.recent-item {
+
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    text-decoration: none;
+
+}
+
+
+
+.primary-button {
+
+    background: #6366df;
+    color: white;
+    border: 0;
+    padding: 12px 25px;
+    border-radius: 8px;
+
+}
+
 .role-chip {
     background: #f1f5f9;
     border-radius: 20px;
     padding: 6px 10px;
+}
+
+.projects-page {
+
+    padding: 32px;
+
+}
+
+
+
+.projects-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 30px;
+
+}
+
+
+
+.project-toolbar input {
+
+    width: 350px;
+
+    padding: 12px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 8px;
+
+    margin-bottom: 25px;
+
+}
+
+
+
+.project-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fill, minmax(280px, 1fr));
+
+    gap: 25px;
+
+}
+
+
+
+.project-card {
+
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 16px;
+
+    padding: 25px;
+
+}
+
+
+
+.project-icon {
+
+    width: 45px;
+
+    height: 45px;
+
+    border-radius: 50%;
+
+    background: #635bff;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 22px;
+
+}
+
+
+
+.project-info {
+
+    display: flex;
+
+    gap: 20px;
+
+    margin: 20px 0;
+
+}
+
+
+
+.progress-container {
+
+    height: 8px;
+
+    background: #eee;
+
+    border-radius: 10px;
+
+}
+
+
+
+.progress-bar {
+
+    height: 100%;
+
+    background: #635bff;
+
+    border-radius: 10px;
+
+}
+
+
+
+.project-button {
+
+    display: block;
+
+    margin-top: 20px;
+
+    text-align: center;
+
+    background: #635bff;
+
+    color: white;
+
+    padding: 10px;
+
+    border-radius: 8px;
+
+    text-decoration: none;
+
+}
+
+
+
+.modal-backdrop {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, .4);
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+}
+
+
+
+.modal {
+
+    background: white;
+
+    padding: 30px;
+
+    border-radius: 15px;
+
+    width: 400px;
+
+}
+
+
+
+.modal input,
+.modal textarea {
+
+    width: 100%;
+
+    padding: 12px;
+
+    margin-bottom: 15px;
+
 }
 
 .modal-backdrop {
@@ -1197,32 +1379,32 @@ border-radius:8px;
 
     position: fixed;
 
-    top:0;
-    left:0;
+    top: 0;
+    left: 0;
 
-    width:100%;
-    height:100%;
+    width: 100%;
+    height: 100%;
 
-    background:rgba(0,0,0,0.4);
+    background: rgba(0, 0, 0, 0.4);
 
-    display:flex;
+    display: flex;
 
-    justify-content:center;
+    justify-content: center;
 
-    align-items:center;
+    align-items: center;
 
-    z-index:1000;
+    z-index: 1000;
 
 }
 
 
 .modal-box {
 
-    background:white;
+    background: white;
 
-    padding:30px;
+    padding: 30px;
 
-    border-radius:12px;
+    border-radius: 12px;
 
 }
 

@@ -21,7 +21,7 @@ import Inbox from "./pages/Inbox";
 import MyIssues from "./pages/MyIssues";
 import Settings from "./pages/Settings";
 import MobileApp from "./pages/MobileApp";
-
+import Projects from "./pages/Projects";
 import AppLayout from "./layouts/AppLayout";
 
 
@@ -47,10 +47,6 @@ function ProtectedRoute({ children }) {
 
 }
 
-
-
-
-
 function AppRoutes() {
 
 
@@ -66,10 +62,12 @@ function AppRoutes() {
                 element={<Login />}
             />
 
-
-
             {/* PRIVATE ROUTES */}
-
+            <Route
+                path="projects"
+                element={<Projects />}
+            />
+            
             <Route
 
                 path="/"
@@ -85,9 +83,6 @@ function AppRoutes() {
                 }
 
             >
-
-
-
                 {/* DEFAULT */}
 
                 <Route
@@ -107,9 +102,6 @@ function AppRoutes() {
                     }
 
                 />
-
-
-
                 {/* GENERAL PAGES */}
 
                 <Route
@@ -134,9 +126,6 @@ function AppRoutes() {
                     path="settings"
                     element={<Settings />}
                 />
-
-
-
                 {/* ===========================
                     PROJECT DASHBOARD
                 ============================ */}
@@ -148,9 +137,6 @@ function AppRoutes() {
                     element={<Dashboard />}
 
                 />
-
-
-
                 {/* ===========================
                     ISSUE LIST
                 ============================ */}
@@ -162,9 +148,6 @@ function AppRoutes() {
                     element={<IssueList />}
 
                 />
-
-
-
                 {/* ===========================
                     ISSUE DETAIL
                 ============================ */}
@@ -176,8 +159,6 @@ function AppRoutes() {
                     element={<IssueDetail />}
 
                 />
-
-
 
                 {/* ===========================
                     MOBILE APP
@@ -191,12 +172,7 @@ function AppRoutes() {
 
                 />
 
-
-
             </Route>
-
-
-
 
             {/* NOT FOUND */}
 
@@ -224,10 +200,6 @@ function AppRoutes() {
     );
 
 }
-
-
-
-
 
 export default function App() {
 

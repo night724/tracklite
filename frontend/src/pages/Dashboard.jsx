@@ -1,343 +1,465 @@
-import {useEffect,useState} from "react";
-import {Link,useParams} from "react-router-dom";
+import {
+    Link,
+    useParams,
+    useNavigate
+} from "react-router-dom";
+
+import {
+    useEffect,
+    useState
+} from "react";
+
 import api from "../api/client";
 
+import NewIssueModal from "../components/NewIssueModal";
 
-export default function Dashboard(){
 
+export default function Dashboard() {
 
-const {projectId}=useParams();
 
+    const { projectId } = useParams();
+    const navigate = useNavigate();
 
-const [data,setData]=useState({
+    const [issues, setIssues] = useState([]);
 
-stats:{},
-issues:[]
-});
+    const [showModal, setShowModal] = useState(false);
 
+    const [loading, setLoading] = useState(true);
 
+    async function loadIssues() {
 
-useEffect(()=>{
+        try {
 
+            setLoading(true);
 
-api.get(
-`/dashboard/${projectId}`
-)
+            const response =
+                await api.get(
+                    `/issues/project/${projectId}`
+                );
 
-.then(res=>{
+            setIssues(response.data);
 
-setData(res.data);
+        } catch (error) {
 
-})
+            console.error(
+                "LOAD ISSUES ERROR:",
+                error.response?.data || error
+            );
 
-.catch(console.log);
+        } finally {
 
+            setLoading(false);
 
-},[projectId]);
+        }
 
+    }
 
+    useEffect(() => {
 
-const stats=data.stats;
+        if (projectId) {
 
+            loadIssues();
 
+        }
 
-return (
+    }, [projectId]);
 
-<div>
+    const openIssues =
+        issues.filter(issue =>
+            issue.status !== "Done" &&
+            issue.status !== "Canceled"
+        );
 
+    const inProgress =
+        issues.filter(issue =>
+            issue.status === "In Progress"
+        );
 
-<div className="page-header">
+    const overdue =
+        openIssues.filter(issue => {
 
+            if (!issue.due_date)
+                return false;
 
-<div>
 
-<div className="breadcrumb">
+            return new Date(issue.due_date)
+                <
+                new Date();
 
-Acme Inc /
-Website Redesign /
-Dashboard
+        });
 
-</div>
+    const doneThisWeek =
+        issues.filter(issue => {
 
+            if (
+                issue.status !== "Done" ||
+                !issue.updated_at
+            )
+                return false;
 
-<h1>
+            const updated =
+                new Date(issue.updated_at);
 
-🟣 Website Redesign
+            const weekAgo =
+                new Date();
 
-</h1>
+            weekAgo.setDate(
+                weekAgo.getDate() - 7
+            );
 
+            return updated >= weekAgo;
 
-<p>
+        });
 
-Relaunch of the marketing site · 12 members
+    const workload = {};
 
-</p>
+    openIssues.forEach(issue => {
 
+        const name =
+            issue.assignee_name ||
+            "Unassigned";
 
-</div>
+        workload[name] =
+            (workload[name] || 0) + 1;
 
+    });
 
-<button className="primary-button">
+    if (loading) {
 
-New issue
+        return (
+            <h2>
+                Loading dashboard...
+            </h2>
+        );
 
-</button>
+    }
 
+    return (
 
-</div>
+        <div>
 
+            <div className="page-header">
 
 
+                <div>
 
+                    <div className="breadcrumb">
 
-<div className="stat-grid">
+                        Acme Inc /
+                        Website Redesign /
+                        Dashboard
 
+                    </div>
 
-<Card
-title="OPEN ISSUES"
-value={stats.open}
-/>
 
+                    <h1>
+                        🟣 Website Redesign
+                    </h1>
 
-<Card
-title="IN PROGRESS"
-value={stats.progress}
-/>
 
+                    <p>
+                        Relaunch of the marketing site
+                    </p>
 
-<Card
-title="OVERDUE"
-value={stats.overdue}
-/>
 
+                </div>
 
-<Card
-title="DONE THIS WEEK"
-value={stats.done}
-/>
 
 
-</div>
+                <button
 
+                    className="primary-button"
 
+                    onClick={() =>
+                        setShowModal(true)
+                    }
 
+                >
 
+                    New issue
 
-<div className="dashboard-grid">
+                </button>
 
+            </div>
 
+            {
+                showModal &&
 
-<section className="panel">
+                <NewIssueModal
+                    open={showModal}
+                    projectId={projectId}
 
-<h2>
-Issues by status
-</h2>
+                    onClose={() =>
+                        setShowModal(false)
+                    }
 
+                    onCreated={() => {
 
-<Bar name="Backlog" count="14"/>
+                        setShowModal(false);
 
-<Bar name="Todo" count="12"/>
+                        loadIssues();
 
-<Bar name="In Progress" count={stats.progress}/>
+                    }}
+                />
+            }
 
-<Bar name="In Review" count="3"/>
+            <div className="stat-grid">
+                <StatCard
+                    title="OPEN ISSUES"
+                    value={openIssues.length}
+                    onClick={() =>
+                        navigate(
+                            `/projects/${projectId}/issues?status=Todo`
+                        )
+                    }
+                />
 
-<Bar name="Done" count={stats.done}/>
 
+                <StatCard
+                    title="IN PROGRESS"
+                    value={inProgress.length}
+                    onClick={() =>
+                        navigate(
+                            `/projects/${projectId}/issues?status=In Progress`
+                        )
+                    }
+                />
 
-</section>
 
+                <StatCard
+                    title="OVERDUE"
+                    value={overdue.length}
+                    onClick={() =>
+                        navigate(
+                            `/projects/${projectId}/issues?status=overdue`
+                        )
+                    }
+                />
 
 
+                <StatCard
+                    title="DONE THIS WEEK"
+                    value={doneThisWeek.length}
+                    onClick={() =>
+                        navigate(
+                            `/projects/${projectId}/issues?status=Done`
+                        )
+                    }
+                />
 
 
-<section className="panel">
+            </div>
 
+            <div className="dashboard-grid">
 
-<h2>
-Open issues by assignee
-</h2>
+                <section className="panel">
 
+                    <h2>
+                        Issues by status
+                    </h2>
 
+                    <StatusBar
+                        name="Backlog"
+                        count={
+                            issues.filter(
+                                i => i.status === "Backlog"
+                            ).length
+                        }
+                    />
 
-{
+                    <StatusBar
+                        name="Todo"
+                        count={
+                            issues.filter(
+                                i => i.status === "Todo"
+                            ).length
+                        }
+                    />
 
-data.issues.map(issue=>(
+                    <StatusBar
+                        name="In Progress"
+                        count={inProgress.length}
+                    />
 
+                    <StatusBar
+                        name="In Review"
+                        count={
+                            issues.filter(
+                                i => i.status === "In Review"
+                            ).length
+                        }
+                    />
 
-<div className="workload"
-key={issue.id}>
+                    <StatusBar
+                        name="Done"
+                        count={
+                            issues.filter(
+                                i => i.status === "Done"
+                            ).length
+                        }
+                    />
 
+                </section>
 
-<span>
+                <section className="panel">
 
-{issue.assignee_name ||
-"Unassigned"}
+                    <h2>
+                        Open issues by assignee
+                    </h2>
 
-</span>
+                    {
+                        Object.entries(workload)
+                            .map(([name, count]) => (
 
+                                <Workload
 
-<strong>
+                                    key={name}
 
-1
+                                    name={name}
 
-</strong>
+                                    count={count}
 
+                                />
 
-</div>
+                            ))
+                    }
 
+                </section>
 
-))
+            </div>
+
+            <section className="panel">
+
+                <h2>
+                    Recently updated
+                </h2>
+
+                {
+                    issues
+                        .slice(0, 10)
+                        .map(issue => (
+
+                            <Link
+
+                                key={issue.id}
+
+                                className="recent-item"
+
+                                to={
+                                    `/projects/${projectId}/issues/${issue.id}`
+                                }
+
+                            >
+
+                                <strong>
+                                    {issue.issue_key}
+                                </strong>
+
+                                <span>
+                                    {issue.title}
+                                </span>
+
+                                <span>
+                                    {issue.status}
+                                </span>
+
+                            </Link>
+
+                        ))
+                }
+
+            </section>
+        </div>
+
+    );
 
 }
 
+function StatCard({
+    title,
+    value,
+    onClick
+}) {
 
-</section>
+    return (
 
+        <div
+            className="stat-card"
+            onClick={onClick}
+        >
 
-
-</div>
-
-
-
-
-
-
-<section className="panel">
-
-
-<h2>
-Recently updated
-</h2>
+            <small>
+                {title}
+            </small>
 
 
+            <h1>
+                {value}
+            </h1>
 
-{
+        </div>
 
-data.issues.map(issue=>(
+    );
 
+}
+function StatusBar({
+    name,
+    count
+}) {
 
-<Link
+    return (
 
-className="recent-item"
-
-key={issue.id}
-
-to={`/projects/${projectId}/issues/${issue.id}`}
-
->
-
-
-<strong>
-
-{issue.issue_key}
-
-</strong>
+        <div className="status-row">
 
 
-<span>
+            <span>
+                {name}
+            </span>
 
-{issue.title}
+            <div className="bar">
 
-</span>
+                <div
+
+                    style={{
+                        width: `${count * 10}%`
+                    }}
+
+                />
+
+            </div>
+
+            <strong>
+                {count}
+            </strong>
 
 
-<span>
+        </div>
 
-{issue.status}
-
-</span>
-
-
-
-</Link>
-
-
-
-))
-
+    );
 
 }
 
+function Workload({
+    name,
+    count
+}) {
+
+    return (
+
+        <div className="workload">
+
+            <span>
+                {name}
+            </span>
 
 
-</section>
+            <strong>
+                {count}
+            </strong>
 
 
+        </div>
 
-</div>
-
-
-);
-
-
-
-}
-
-
-
-
-
-function Card({title,value}){
-
-
-return (
-
-<div className="stat-card">
-
-<small>
-{title}
-</small>
-
-
-<h1>
-{value || 0}
-</h1>
-
-
-</div>
-
-)
-
-}
-
-
-
-
-
-function Bar({name,count}){
-
-
-return (
-
-<div className="status-row">
-
-
-<span>
-{name}
-</span>
-
-
-<div className="bar">
-
-<div
-style={{
-width:`${count*10}%`
-}}
-/>
-
-
-</div>
-
-
-<strong>
-{count}
-</strong>
-
-
-</div>
-
-)
-
+    );
 
 }

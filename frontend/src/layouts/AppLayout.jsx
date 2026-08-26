@@ -3,100 +3,342 @@ import {
     Outlet
 } from "react-router-dom";
 
-import { useAuth } from "../context/AuthContext";
+import {
+    useEffect,
+    useState
+} from "react";
+
+import {
+    useAuth
+} from "../context/AuthContext";
+
+import api from "../api/client";
+
 
 export default function AppLayout() {
 
-    const { user, logout } = useAuth();
+
+    const {
+        user,
+        logout
+    } = useAuth();
+
+
+
+    const [projects, setProjects] =
+        useState([]);
+
+
+    const [loading, setLoading] =
+        useState(true);
+
+
+    useEffect(() => {
+
+
+        async function loadProjects() {
+
+
+            try {
+
+
+                const res =
+                    await api.get(
+                        "/projects"
+                    );
+
+
+
+                console.log(
+                    "PROJECTS:",
+                    res.data
+                );
+
+
+
+                setProjects(
+
+                    Array.isArray(res.data)
+
+                        ? res.data
+
+                        : res.data.projects || []
+
+                );
+
+
+
+            }
+            catch (error) {
+
+
+                console.error(
+                    "LOAD PROJECTS ERROR:",
+                    error.response?.data || error
+                );
+
+
+            }
+            finally {
+
+
+                setLoading(false);
+
+
+            }
+
+
+        }
+
+
+
+        loadProjects();
+
+
+
+    }, []);
+
+
+
+
 
     return (
+
+
         <div className="app">
+
 
             <aside className="sidebar">
 
+
+
                 <div className="organization">
-                    <strong>Acme Inc</strong>
+
+                    <strong>
+                        Acme Inc
+                    </strong>
+
                 </div>
 
+
+
+
+
                 <nav>
+
 
                     <Link to="/inbox">
                         Inbox
                     </Link>
 
+
                     <Link to="/my-issues">
                         My Issues
                     </Link>
+
 
                     <Link to="/members">
                         Members
                     </Link>
 
+
                     <Link to="/settings">
                         Settings
                     </Link>
 
+
                 </nav>
 
+
+
+
+
+
                 <div className="projects-title">
+
                     PROJECTS
+
                 </div>
+
+
+
+
+
 
                 <div className="projects">
 
-                    <Link to="/">
-                        <span className="project-color blue"/>
-                        Website Redesign
-                    </Link>
 
-                    <Link to="/projects/2/issues">
-                        <span className="project-color green"/>
-                        Mobile App
-                    </Link>
+                    {
 
-                    <Link to="/projects/3/issues">
-                        <span className="project-color orange"/>
-                        API Platform
-                    </Link>
+                        loading && (
+
+                            <p>
+                                Loading...
+                            </p>
+
+                        )
+
+                    }
+
+
+
+                    {
+
+                        !loading &&
+                        projects.length === 0 &&
+
+                        (
+
+                            <p>
+                                No projects
+                            </p>
+
+                        )
+
+                    }
+
+
+
+
+                    {
+
+                        projects.map(project => (
+
+
+                            <Link
+
+                                key={project.id}
+
+                                to={
+                                    `/projects/${project.id}/dashboard`
+                                }
+
+                            >
+
+
+                                <span
+
+                                    className={
+                                        `project-color ${project.color ||
+                                        "blue"
+                                        }`
+                                    }
+
+                                />
+
+
+                                {project.name}
+
+
+                            </Link>
+
+
+                        ))
+
+                    }
+
+
 
                 </div>
+
+
+
+
+
+
 
                 <div className="current-user">
 
+
+
                     <div>
-                        {user?.name}
+
+                        {
+                            user?.name ||
+                            "User"
+                        }
+
                     </div>
 
+
+
                     <small>
-                        Owner
+
+                        {
+                            user?.role ||
+                            "Member"
+                        }
+
                     </small>
 
-                    <button onClick={logout}>
+
+
+
+                    <button
+                        onClick={logout}
+                    >
+
                         Log out
+
                     </button>
+
+
 
                 </div>
 
+
+
+
+
             </aside>
+
+
+
+
+
+
 
             <main className="main">
 
+
                 <header className="topbar">
 
+
                     <div>
+
                         Acme Inc
                         {" / "}
-                        Website Redesign
+                        TrackLite
+
+
                     </div>
+
 
                 </header>
 
+
+
+
+
                 <section className="content">
+
+
                     <Outlet />
+
+
                 </section>
+
+
+
 
             </main>
 
+
+
         </div>
+
+
     );
+
+
 }

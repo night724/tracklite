@@ -4,48 +4,195 @@ import {
     useSearchParams
 } from "react-router-dom";
 
-import { useEffect, useState } from "react";
+import {
+    useEffect,
+    useState
+} from "react";
 
 import api from "../api/client";
 
+import NewIssueModal from "../components/NewIssueModal";
+
+
 export default function IssueList() {
 
-    const { projectId } = useParams();
 
-    const [searchParams, setSearchParams] =
-        useSearchParams();
+    const {
+        projectId
+    } = useParams();
+
+
+
+    const [
+        searchParams,
+        setSearchParams
+    ] = useSearchParams();
+
+
 
     const [issues, setIssues] = useState([]);
+
+    const [
+        showModal,
+        setShowModal
+    ] = useState(false);
+
+
 
     const status =
         searchParams.get("status") || "";
 
+
+
     const priority =
         searchParams.get("priority") || "";
+
+
 
     const sort =
         searchParams.get("sort") || "priority";
 
+
+
+
+
+    async function loadIssues() {
+
+        try {
+
+            const params = new URLSearchParams();
+
+
+            if (
+                status &&
+                status !== "overdue" &&
+                status !== "done-this-week"
+            ) {
+
+                params.set(
+                    "status",
+                    status
+                );
+
+            }
+
+
+            if (priority) {
+
+                params.set(
+                    "priority",
+                    priority
+                );
+
+            }
+
+
+            params.set(
+                "sort",
+                sort
+            );
+
+
+            const response =
+                await api.get(
+                    `/issues/project/${projectId}?${params}`
+                );
+
+
+            let data = response.data;
+
+
+
+            // =========================
+            // OVERDUE CONDITION
+            // =========================
+
+            if (status === "overdue") {
+
+                data =
+                    data.filter(issue => {
+
+
+                        if (!issue.due_date)
+                            return false;
+
+
+                        return (
+
+                            new Date(issue.due_date)
+                            <
+                            new Date()
+
+                            &&
+
+                            issue.status !== "Done"
+
+                            &&
+
+                            issue.status !== "Canceled"
+
+                        );
+
+
+                    });
+
+            }
+
+
+            if (status === "done-this-week") {
+
+
+                const weekAgo =
+                    new Date();
+
+
+                weekAgo.setDate(
+                    weekAgo.getDate() - 7
+                );
+
+
+                data =
+                    data.filter(issue => {
+
+
+                        if (
+                            issue.status !== "Done"
+                            ||
+                            !issue.updated_at
+                        ) {
+
+                            return false;
+
+                        }
+
+
+                        return (
+                            new Date(issue.updated_at)
+                            >=
+                            weekAgo
+                        );
+
+
+                    });
+            }
+            setIssues(data);
+        }
+        catch (error) {
+
+            console.error(
+                "LOAD ISSUES ERROR",
+                error
+            );
+
+        }
+
+    }
+
     useEffect(() => {
 
-        const params = new URLSearchParams();
 
-        if (status)
-            params.set("status", status);
+        loadIssues();
 
-        if (priority)
-            params.set("priority", priority);
-
-        if (sort)
-            params.set("sort", sort);
-
-        api.get(
-            `/issues/project/${projectId}?${params.toString()}`
-        )
-        .then(response => {
-            setIssues(response.data);
-        })
-        .catch(console.error);
 
     }, [
         projectId,
@@ -54,198 +201,482 @@ export default function IssueList() {
         sort
     ]);
 
-    function addStatusFilter(value) {
+    function updateFilter(
+        key,
+        value
+    ) {
 
-        setSearchParams({
-            status: value,
-            sort
-        });
+
+        const params =
+            Object.fromEntries(
+                searchParams
+            );
+
+
+        if (value) {
+
+            params[key] = value;
+
+        }
+        else {
+
+            delete params[key];
+
+        }
+
+
+        setSearchParams(params);
+
 
     }
+
+
+
+
+
+
 
     function clearFilters() {
 
         setSearchParams({
+
             sort
+
         });
 
     }
 
+
+
+
+
+
+
     const groups = [
+
         "Backlog",
         "Todo",
         "In Progress",
         "In Review",
         "Done"
+
     ];
 
+
+
+
+
     return (
+
         <div>
 
+
+
             <div className="breadcrumb">
+
                 Acme Inc /
                 Website Redesign /
                 Issues
+
             </div>
+
+
+
+
+
 
             <div className="issue-toolbar">
 
-                <div className="filters">
 
-                    {status && (
-                        <button
-                            className="filter-chip"
-                            onClick={clearFilters}
-                        >
-                            Status: {status} ×
-                        </button>
-                    )}
 
-                    {priority && (
-                        <button
-                            className="filter-chip"
-                            onClick={clearFilters}
-                        >
-                            Priority: {priority} ×
-                        </button>
-                    )}
+
+
+                <div>
+
 
                     <select
+
                         value={status}
-                        onChange={(e) =>
-                            e.target.value
-                                ? addStatusFilter(e.target.value)
-                                : clearFilters()
+
+                        onChange={
+                            e =>
+                                updateFilter(
+                                    "status",
+                                    e.target.value
+                                )
                         }
+
                     >
+
                         <option value="">
-                            + Filter
+                            Status
                         </option>
 
-                        <option value="Todo">
+
+                        <option>
                             Todo
                         </option>
 
-                        <option value="In Progress">
+
+                        <option>
                             In Progress
                         </option>
 
-                        <option value="In Review">
+
+                        <option>
                             In Review
                         </option>
 
-                        <option value="Done">
+
+                        <option>
                             Done
                         </option>
+
+
                     </select>
+
+
+
+
+
+
+                    <select
+
+                        value={priority}
+
+                        onChange={
+                            e =>
+                                updateFilter(
+                                    "priority",
+                                    e.target.value
+                                )
+                        }
+
+                    >
+
+                        <option value="">
+                            Priority
+                        </option>
+
+
+                        <option>
+                            Urgent
+                        </option>
+
+
+                        <option>
+                            High
+                        </option>
+
+
+                        <option>
+                            Medium
+                        </option>
+
+
+                        <option>
+                            Low
+                        </option>
+
+
+                    </select>
+
+
+
+
+
+                    {
+                        (status || priority) &&
+
+                        <button
+
+                            onClick={clearFilters}
+
+                        >
+
+                            Clear
+
+                        </button>
+
+                    }
+
+
 
                 </div>
 
+
+
+
+
+
+
                 <select
+
                     value={sort}
-                    onChange={(e) =>
-                        setSearchParams({
-                            status,
-                            priority,
-                            sort: e.target.value
-                        })
+
+                    onChange={
+                        e =>
+                            updateFilter(
+                                "sort",
+                                e.target.value
+                            )
                     }
+
                 >
+
                     <option value="priority">
                         Priority
                     </option>
+
 
                     <option value="due_date">
                         Due date
                     </option>
 
+
                     <option value="updated">
-                        Last updated
+                        Updated
                     </option>
+
+
                 </select>
 
-                <button className="primary-button">
+
+
+
+
+
+
+
+                <button
+
+                    className="primary-button"
+
+                    onClick={() =>
+                        setShowModal(true)
+                    }
+
+                >
+
                     New issue
+
+
                 </button>
+
+
 
             </div>
 
-            {groups.map(group => {
 
-                const groupIssues =
-                    issues.filter(
-                        issue =>
-                            issue.status === group
+
+
+
+
+
+            {
+                groups.map(group => {
+
+
+                    const groupIssues =
+                        issues.filter(
+                            issue =>
+                                issue.status === group
+                        );
+
+
+
+                    if (groupIssues.length === 0)
+
+                        return null;
+
+
+
+                    return (
+
+                        <section
+
+                            className="issue-group"
+
+                            key={group}
+
+                        >
+
+
+                            <h2>
+
+                                {group}
+
+                                {" "}
+
+                                ({groupIssues.length})
+
+                            </h2>
+
+
+
+
+
+                            {
+                                groupIssues.map(issue => (
+
+
+                                    <Link
+
+                                        key={issue.id}
+
+                                        to={
+                                            `/projects/${projectId}/issues/${issue.id}`
+                                        }
+
+                                        className="issue-row"
+
+                                    >
+
+
+                                        <span
+                                            className={
+                                                `priority ${issue.priority}`
+                                            }
+                                        >
+
+                                            {issue.priority}
+
+                                        </span>
+
+
+
+
+                                        <strong>
+
+                                            {issue.issue_key}
+
+                                        </strong>
+
+
+
+
+                                        <span>
+
+                                            {issue.title}
+
+                                        </span>
+
+
+
+
+                                        <span>
+
+                                            {
+                                                issue.due_date
+                                                    ?
+                                                    new Date(
+                                                        issue.due_date
+                                                    )
+                                                        .toLocaleDateString()
+                                                    :
+                                                    "-"
+                                            }
+
+                                        </span>
+
+
+
+
+
+                                        <span>
+
+                                            {
+                                                issue.assignee_name ||
+                                                "Unassigned"
+                                            }
+
+                                        </span>
+
+
+
+
+                                    </Link>
+
+
+                                ))
+
+                            }
+
+
+
+                        </section>
+
                     );
 
-                if (groupIssues.length === 0) {
-                    return null;
-                }
 
-                return (
-                    <section
-                        className="issue-group"
-                        key={group}
-                    >
+                })
 
-                        <h2>
-                            {group}
-                            {" "}
-                            <span>
-                                {groupIssues.length}
-                            </span>
-                        </h2>
+            }
 
-                        {groupIssues.map(issue => (
 
-                            <Link
-                                key={issue.id}
-                                to={`/projects/${projectId}/issues/${issue.id}`}
-                                className="issue-row"
-                            >
 
-                                <span className={`priority ${issue.priority}`}>
-                                    {issue.priority}
-                                </span>
 
-                                <strong>
-                                    {issue.issue_key}
-                                </strong>
 
-                                <span className="issue-title">
-                                    {issue.title}
-                                </span>
 
-                                <span>
-                                    {issue.due_date
-                                        ? new Date(
-                                            issue.due_date
-                                        ).toLocaleDateString()
-                                        : "—"
-                                    }
-                                </span>
+            {
+                issues.length === 0 &&
 
-                                <span>
-                                    {issue.assignee_name || "Unassigned"}
-                                </span>
-
-                            </Link>
-
-                        ))}
-
-                    </section>
-                );
-            })}
-
-            {issues.length === 0 && (
                 <div className="empty-state">
-                    No issues match these filters.
-                    <button onClick={clearFilters}>
-                        Clear filters
-                    </button>
+
+                    No issues found
+
+
                 </div>
-            )}
+
+            }
+
+
+
+
+
+
+
+            {
+                showModal &&
+
+
+                <NewIssueModal
+
+
+                    open={showModal}
+
+
+                    projectId={projectId}
+
+
+                    onClose={() => {
+
+                        setShowModal(false);
+
+                    }}
+
+
+
+                    onCreated={() => {
+
+
+                        loadIssues();
+
+
+                    }}
+
+
+                />
+
+            }
+
+
+
+
 
         </div>
+
     );
+
+
 }

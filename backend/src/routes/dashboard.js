@@ -1,126 +1,215 @@
 import express from "express";
 import pool from "../db.js";
+import { authenticate } from "../middleware/auth.js";
 
 const router = express.Router();
 
 
 
-router.get("/:projectId", async(req,res)=>{
+router.get(
+    "/:projectId",
+    authenticate,
+    async (req, res) => {
 
 
-    const {projectId}=req.params;
+        try {
 
 
-    try{
-
-
-        const open =
-        await pool.query(
-        `
-        SELECT COUNT(*)
-        FROM issues
-        WHERE project_id=$1
-        AND status NOT IN
-        ('Done','Canceled')
-        `,
-        [projectId]
-        );
+            const {
+                projectId
+            } = req.params;
 
 
 
-        const progress =
-        await pool.query(
-        `
-        SELECT COUNT(*)
-        FROM issues
-        WHERE project_id=$1
-        AND status='In Progress'
-        `,
-        [projectId]
-        );
+            // Check project exists
+
+            const project = await pool.query(
+
+                `
+                SELECT id,name
+                FROM projects
+                WHERE id=$1
+                `,
+
+                [
+                    projectId
+                ]
+
+            );
 
 
 
-        const overdue =
-        await pool.query(
-        `
-        SELECT COUNT(*)
-        FROM issues
-        WHERE project_id=$1
-        AND due_date < CURRENT_DATE
-        AND status NOT IN
-        ('Done','Canceled')
-        `,
-        [projectId]
-        );
+            if (project.rows.length === 0) {
+
+                return res.status(404).json({
+
+                    message: "Project not found"
+
+                });
+
+            }
 
 
 
-        const done =
-        await pool.query(
-        `
-        SELECT COUNT(*)
-        FROM issues
-        WHERE project_id=$1
-        AND status='Done'
-        AND updated_at >= CURRENT_DATE - INTERVAL '7 days'
-        `,
-        [projectId]
-        );
+
+
+            // Dashboard statistics
+
+            const stats = await pool.query(
+
+                `
+            SELECT
+
+
+            COUNT(*) FILTER(
+                WHERE status NOT IN
+                ('Done','Canceled')
+            )::int AS open,
 
 
 
-        const issues =
-        await pool.query(
-        `
-        SELECT
-        i.*,
-        u.name as assignee_name
-
-        FROM issues i
-
-        LEFT JOIN users u
-        ON u.id=i.assignee_id
-
-        WHERE i.project_id=$1
-
-        ORDER BY updated_at DESC
-
-        LIMIT 10
-
-        `,
-        [projectId]
-        );
+            COUNT(*) FILTER(
+                WHERE status='In Progress'
+            )::int AS progress,
 
 
 
-        res.json({
-
-            stats:{
-                open:open.rows[0].count,
-                progress:progress.rows[0].count,
-                overdue:overdue.rows[0].count,
-                done:done.rows[0].count
-            },
-
-            issues:issues.rows
-
-        });
+            COUNT(*) FILTER(
+                WHERE due_date < CURRENT_DATE
+                AND status NOT IN
+                ('Done','Canceled')
+            )::int AS overdue,
 
 
 
-    }catch(error){
+            COUNT(*) FILTER(
+                WHERE status='Done'
+                AND updated_at >=
+                CURRENT_DATE - INTERVAL '7 days'
+            )::int AS done
 
-        console.log(error);
 
-        res.status(500).json({
-            message:"Dashboard error"
-        });
+
+            FROM issues
+
+
+            WHERE project_id=$1
+
+            AND deleted_at IS NULL
+
+            `,
+
+                [
+                    projectId
+                ]
+
+            );
+
+
+
+
+
+
+            // Recent issues
+
+            const issues = await pool.query(
+
+                `
+            SELECT
+
+
+            i.id,
+
+            i.issue_key,
+
+            i.title,
+
+            i.status,
+
+            i.priority,
+
+            i.due_date,
+
+
+            u.name AS assignee_name
+
+
+
+            FROM issues i
+
+
+
+            LEFT JOIN users u
+
+            ON i.assignee_id=u.id
+
+
+
+            WHERE i.project_id=$1
+
+            AND i.deleted_at IS NULL
+
+
+
+            ORDER BY i.updated_at DESC
+
+
+
+            LIMIT 10
+
+
+            `,
+
+                [
+                    projectId
+                ]
+
+            );
+
+
+
+
+
+
+            res.json({
+
+                project: project.rows[0],
+
+                stats: stats.rows[0],
+
+                issues: issues.rows
+
+            });
+
+
+
+
+
+        }
+        catch (error) {
+
+
+            console.error(
+                "DASHBOARD ERROR:",
+                error
+            );
+
+
+
+            res.status(500).json({
+
+                message: error.message
+
+            });
+
+
+        }
+
 
     }
 
+);
 
-});
 
 
 export default router;

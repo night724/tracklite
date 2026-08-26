@@ -19,9 +19,6 @@ export default function Members() {
     const [error, setError] = useState("");
     const [inviteError, setInviteError] = useState("");
 
-    /*
-     * Load members and pending invitations
-     */
     useEffect(() => {
         loadMembers();
         loadInvites();
@@ -66,10 +63,6 @@ export default function Members() {
         } catch (err) {
             console.error("LOAD INVITES ERROR:", err);
 
-            /*
-             * Don't break the whole Members page
-             * if the invites endpoint isn't ready yet.
-             */
             setInvites([]);
         }
     }
@@ -211,7 +204,7 @@ export default function Members() {
     }
 
     return (
-        <div className="members-page">
+        <div className="page">
 
             {/* HEADER */}
 

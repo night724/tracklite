@@ -5,25 +5,70 @@ import {
 
 import {
     useParams,
-    Link
+    useNavigate
 } from "react-router-dom";
 
 import api from "../api/client";
 
+
 export default function IssueDetail() {
 
-    const { issueId, projectId } = useParams();
 
-    const [issue, setIssue] = useState(null);
+    const {
+        issueId,
+        projectId
+    } = useParams();
+
+
+    const navigate = useNavigate();
+
+
+    const [issue, setIssue] =
+        useState(null);
+
 
     const [editingTitle, setEditingTitle] =
         useState(false);
 
+
     const [title, setTitle] =
         useState("");
 
+
     const [comment, setComment] =
         useState("");
+
+
+
+    async function loadIssue() {
+
+        try {
+
+            const res =
+                await api.get(
+                    `/issues/${issueId}`
+                );
+
+
+            setIssue(res.data);
+
+            setTitle(
+                res.data.title
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "LOAD ISSUE ERROR",
+                error
+            );
+
+        }
+
+    }
+
+
 
     useEffect(() => {
 
@@ -31,213 +76,403 @@ export default function IssueDetail() {
 
     }, [issueId]);
 
-    async function loadIssue() {
 
-        try {
 
-            const response =
-                await api.get(`/issues/${issueId}`);
 
-            setIssue(response.data);
-
-            setTitle(response.data.title);
-
-        } catch (error) {
-
-            console.error(error);
-
-        }
-
-    }
 
     async function saveTitle() {
 
+
         try {
 
-            const response =
-                await api.patch(
-                    `/issues/${issueId}`,
-                    {
-                        title
-                    }
-                );
 
-            setIssue(response.data);
+            await api.patch(
+                `/issues/${issueId}`,
+                {
+                    title
+                }
+            );
+
+
+            await loadIssue();
+
 
             setEditingTitle(false);
+
+
 
         } catch (error) {
 
             console.error(error);
 
         }
+
     }
+
+
+
+
+
+
 
     async function updateProperty(
         field,
         value
     ) {
 
+
         try {
 
-            const response =
-                await api.patch(
-                    `/issues/${issueId}`,
-                    {
-                        [field]: value
-                    }
-                );
 
-            setIssue(response.data);
+            await api.patch(
+                `/issues/${issueId}`,
+                {
+                    [field]: value
+                }
+            );
+
+
+            await loadIssue();
+
 
         } catch (error) {
 
             console.error(error);
 
         }
+
+
     }
+
+
+
+
+
+
+
+    async function addComment() {
+
+
+        if (!comment.trim())
+            return;
+
+
+
+        try {
+
+
+            await api.post(
+                `/comments`,
+                {
+                    issue_id: issueId,
+                    body: comment
+                }
+            );
+
+
+            setComment("");
+
+            await loadIssue();
+
+
+
+        } catch (error) {
+
+            console.error(
+                "COMMENT ERROR",
+                error
+            );
+
+        }
+
+    }
+
+
+
+
+
+
+    async function deleteIssue() {
+
+
+        const ok =
+            window.confirm(
+                "Delete this issue?"
+            );
+
+
+        if (!ok)
+            return;
+
+
+
+        try {
+
+
+            await api.delete(
+                `/issues/${issueId}`
+            );
+
+
+            navigate(
+                `/projects/${projectId}/issues`
+            );
+
+
+        } catch (error) {
+
+            console.error(error);
+
+        }
+
+    }
+
+
+
+
+
+
 
     if (!issue) {
 
         return (
-            <div className="loading">
+            <div>
                 Loading issue...
             </div>
         );
 
     }
 
+
+
+
+
+
     return (
+
         <div>
 
+
             <div className="breadcrumb">
+
                 Acme Inc /
                 Website Redesign /
                 {issue.issue_key}
+
             </div>
+
+
+
+
 
             <div className="issue-detail">
 
+
+
+
+
                 <main className="issue-main">
 
+
+
                     <div className="issue-key">
+
                         {issue.issue_key}
+
                     </div>
 
-                    {editingTitle ? (
 
-                        <div className="edit-title">
 
-                            <input
-                                value={title}
-                                onChange={(e) =>
-                                    setTitle(
-                                        e.target.value
-                                    )
-                                }
-                            />
 
-                            <button
-                                onClick={saveTitle}
-                            >
-                                Save
-                            </button>
 
-                            <button
+
+                    {
+                        editingTitle ?
+
+
+                            <div>
+
+
+                                <input
+
+                                    value={title}
+
+                                    onChange={
+                                        e =>
+                                            setTitle(
+                                                e.target.value
+                                            )
+                                    }
+
+                                />
+
+
+
+                                <button
+                                    onClick={saveTitle}
+                                >
+                                    Save
+                                </button>
+
+
+
+                                <button
+
+                                    onClick={() =>
+                                        setEditingTitle(false)
+                                    }
+
+                                >
+
+                                    Cancel
+
+                                </button>
+
+
+
+                            </div>
+
+
+
+                            :
+
+
+
+                            <h1
                                 onClick={() =>
-                                    setEditingTitle(false)
+                                    setEditingTitle(true)
                                 }
                             >
-                                Cancel
-                            </button>
 
-                        </div>
+                                {issue.title}
 
-                    ) : (
+                            </h1>
 
-                        <h1
-                            onClick={() =>
-                                setEditingTitle(true)
-                            }
-                        >
-                            {issue.title}
-                        </h1>
 
-                    )}
+                    }
 
-                    <div className="description">
 
-                        <p>
-                            {issue.description ||
-                                "No description"}
-                        </p>
 
-                    </div>
 
-                    <section className="attachments">
 
-                        <h2>
-                            Attachments
-                        </h2>
+                    <p>
 
-                        <div className="attachment">
-                            No attachments yet
-                        </div>
+                        {
+                            issue.description ||
+                            "No description"
+                        }
 
-                    </section>
+                    </p>
 
-                    <section className="activity">
+
+
+
+
+
+
+                    <section>
 
                         <h2>
                             Activity
                         </h2>
 
-                        <ActivityItem>
-                            {issue.issue_key}
-                            {" "}
-                            was created
-                        </ActivityItem>
 
-                        <ActivityItem>
-                            Status changed to
+                        <div>
+                            Issue created
+                        </div>
+
+
+                        <div>
+
+                            Status:
                             {" "}
                             {issue.status}
-                        </ActivityItem>
+
+                        </div>
+
 
                     </section>
 
-                    <section className="comment-box">
+
+
+
+
+
+
+
+                    <section>
+
+
+                        <h2>
+                            Comment
+                        </h2>
+
 
                         <textarea
+
                             value={comment}
-                            onChange={(e) =>
-                                setComment(
-                                    e.target.value
-                                )
+
+                            onChange={
+                                e =>
+                                    setComment(
+                                        e.target.value
+                                    )
                             }
-                            placeholder="Leave a comment…"
+
+
+                            placeholder="Write a comment..."
+
                         />
 
+
+
                         <button
+
                             className="primary-button"
-                            disabled={!comment.trim()}
+
+                            onClick={addComment}
+
                         >
+
                             Comment
+
                         </button>
 
+
                     </section>
+
+
 
                 </main>
 
+
+
+
+
+
+
+
+
                 <aside className="properties">
+
+
 
                     <h2>
                         Properties
                     </h2>
 
+
+
+
+
                     <Property
+
                         label="Status"
-                        value={issue.status}
+
+                        value={
+                            issue.status
+                        }
+
                         options={[
                             "Backlog",
                             "Todo",
@@ -246,30 +481,55 @@ export default function IssueDetail() {
                             "Done",
                             "Canceled"
                         ]}
-                        onChange={(value) =>
-                            updateProperty(
-                                "status",
-                                value
-                            )
+
+
+                        onChange={
+                            value =>
+                                updateProperty(
+                                    "status",
+                                    value
+                                )
                         }
+
                     />
 
+
+
+
+
+
+
                     <Property
+
                         label="Priority"
-                        value={issue.priority}
+
+                        value={
+                            issue.priority
+                        }
+
                         options={[
                             "Urgent",
                             "High",
                             "Medium",
                             "Low"
                         ]}
-                        onChange={(value) =>
-                            updateProperty(
-                                "priority",
-                                value
-                            )
+
+
+                        onChange={
+                            value =>
+                                updateProperty(
+                                    "priority",
+                                    value
+                                )
                         }
+
                     />
+
+
+
+
+
+
 
                     <div className="property">
 
@@ -278,11 +538,23 @@ export default function IssueDetail() {
                         </label>
 
                         <div>
-                            {issue.assignee_name ||
-                                "Unassigned"}
+
+                            {
+                                issue.assignee_name ||
+                                "Unassigned"
+                            }
+
                         </div>
 
+
                     </div>
+
+
+
+
+
+
+
 
                     <div className="property">
 
@@ -290,72 +562,62 @@ export default function IssueDetail() {
                             Due date
                         </label>
 
+
                         <div>
-                            {issue.due_date ||
-                                "Not set"}
+
+                            {
+                                issue.due_date ||
+                                "Not set"
+                            }
+
                         </div>
+
 
                     </div>
 
-                    <div className="property">
 
-                        <label>
-                            Created
-                        </label>
 
-                        <div>
-                            {new Date(
-                                issue.created_at
-                            ).toLocaleString()}
-                        </div>
 
-                    </div>
 
-                    <div className="property">
 
-                        <label>
-                            Updated
-                        </label>
-
-                        <div>
-                            {new Date(
-                                issue.updated_at
-                            ).toLocaleString()}
-                        </div>
-
-                    </div>
 
                     <button
+
                         className="danger-button"
-                        onClick={async () => {
 
-                            const confirmed =
-                                window.confirm(
-                                    "Delete this issue?"
-                                );
+                        onClick={deleteIssue}
 
-                            if (!confirmed)
-                                return;
-
-                            await api.delete(
-                                `/issues/${issue.id}`
-                            );
-
-                            window.location.href =
-                                `/projects/${projectId}/issues`;
-
-                        }}
                     >
+
                         Delete issue
+
                     </button>
+
+
+
 
                 </aside>
 
+
+
+
+
+
             </div>
 
+
+
         </div>
+
     );
+
+
 }
+
+
+
+
+
 
 function Property({
     label,
@@ -364,38 +626,53 @@ function Property({
     onChange
 }) {
 
+
     return (
+
         <div className="property">
+
 
             <label>
                 {label}
             </label>
 
+
+
             <select
+
                 value={value}
-                onChange={(e) =>
-                    onChange(e.target.value)
+
+                onChange={
+                    e =>
+                        onChange(
+                            e.target.value
+                        )
                 }
+
             >
-                {options.map(option => (
-                    <option
-                        key={option}
-                        value={option}
-                    >
-                        {option}
-                    </option>
-                ))}
+
+                {
+                    options.map(
+                        option =>
+
+                            <option
+                                key={option}
+                                value={option}
+                            >
+
+                                {option}
+
+                            </option>
+
+                    )
+                }
+
+
             </select>
 
-        </div>
-    );
-}
 
-function ActivityItem({ children }) {
-
-    return (
-        <div className="activity-item">
-            {children}
         </div>
+
     );
+
 }

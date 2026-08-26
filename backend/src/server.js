@@ -8,6 +8,8 @@ import projectRoutes from "./routes/projects.js";
 import issueRoutes from "./routes/issues.js";
 import memberRoutes from "./routes/members.js";
 import dashboardRoutes from "./routes/dashboard.js";
+import commentsRoutes from "./routes/comments.js";
+import inboxRoutes from "./routes/inbox.js";
 
 
 dotenv.config();
@@ -17,14 +19,18 @@ const app = express();
 
 
 
+// CORS
+
 app.use(
     cors({
-        origin:"http://localhost:5173",
-        credentials:true
+        origin: "http://localhost:5173",
+        credentials: true
     })
 );
 
 
+
+// JSON parser
 
 app.use(
     express.json()
@@ -32,15 +38,19 @@ app.use(
 
 
 
+
+// Health check
+
 app.get(
     "/api/health",
-    (req,res)=>{
+    (req, res) => {
 
         res.json({
 
-            success:true,
+            success: true,
 
-            message:"TrackLite API is running"
+            message:
+                "TrackLite API is running"
 
         });
 
@@ -49,10 +59,16 @@ app.get(
 
 
 
+
+
+// Routes
+
+
 app.use(
     "/api/auth",
     authRoutes
 );
+
 
 
 app.use(
@@ -61,16 +77,19 @@ app.use(
 );
 
 
+
 app.use(
     "/api/issues",
     issueRoutes
 );
 
 
+
 app.use(
     "/api/members",
     memberRoutes
 );
+
 
 
 app.use(
@@ -80,14 +99,29 @@ app.use(
 
 
 
+app.use(
+    "/api/comments",
+    commentsRoutes
+);
+
+
+
+app.use(
+    "/api/inbox",
+    inboxRoutes
+);
+
+
+// Server
+
 const PORT =
-process.env.PORT || 5000;
+    process.env.PORT || 5000;
 
 
 
 app.listen(
     PORT,
-    ()=>{
+    () => {
 
         console.log(
             `TrackLite API running on port ${PORT}`

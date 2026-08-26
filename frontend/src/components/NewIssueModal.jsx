@@ -3,48 +3,48 @@ import api from "../api/client";
 
 
 export default function NewIssueModal({
+    open,
     projectId,
     onClose,
     onCreated
 }) {
 
 
-    const [form,setForm] = useState({
+    const [title, setTitle] = useState("");
 
-        title:"",
-        description:"",
-        status:"Todo",
-        priority:"Medium",
-        due_date:""
+    const [description, setDescription] = useState("");
 
-    });
+    const [priority, setPriority] = useState("Medium");
 
+    const [status, setStatus] = useState("Todo");
 
-
-    const [error,setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
 
 
-    function handleChange(e){
-
-        setForm({
-
-            ...form,
-
-            [e.target.name]: e.target.value
-
-        });
-
+    if (!open) {
+        return null;
     }
 
 
 
-    async function handleSubmit(e){
+    async function handleSubmit(e) {
 
         e.preventDefault();
 
 
-        try{
+        if (!title.trim()) {
+            alert("Title is required");
+            return;
+        }
+
+
+
+        try {
+
+
+            setLoading(true);
+
 
 
             await api.post(
@@ -53,246 +53,242 @@ export default function NewIssueModal({
 
                     project_id: projectId,
 
-                    issue_key:
-                    "ISSUE-" + Date.now(),
+                    title,
 
-                    title:
-                    form.title,
+                    description,
 
-                    description:
-                    form.description,
+                    priority,
 
-                    status:
-                    form.status,
-
-                    priority:
-                    form.priority,
-
-                    due_date:
-                    form.due_date || null
+                    status
 
                 }
             );
 
 
-            if(onCreated){
 
-                onCreated();
+            setTitle("");
 
-            }
+            setDescription("");
+
+            setPriority("Medium");
+
+            setStatus("Todo");
 
 
-            onClose();
+
+            onCreated();
 
 
 
-        }catch(error){
+        }
+        catch (error) {
 
 
             console.error(
                 "CREATE ISSUE ERROR:",
-                error
+                error.response?.data || error
             );
 
 
-            setError(
-                error.response?.data?.message ||
-                "Cannot create issue"
+            alert(
+                "Failed to create issue"
             );
+
 
         }
+        finally {
 
+            setLoading(false);
+
+        }
 
     }
 
 
 
-return (
+    return (
 
-<div className="modal-background">
+        <div className="modal-backdrop">
 
 
-<div className="modal-box">
+            <div className="modal">
 
 
-<h2>
-New Issue
-</h2>
+                <h2>
+                    Create new issue
+                </h2>
 
 
 
-{
-error &&
-<p className="error">
-{error}
-</p>
-}
+                <form onSubmit={handleSubmit}>
 
 
+                    <label>
+                        Title
+                    </label>
 
 
-<form onSubmit={handleSubmit}>
+                    <input
 
+                        value={title}
 
-<input
+                        onChange={
+                            e =>
+                                setTitle(
+                                    e.target.value
+                                )
+                        }
 
-name="title"
+                        placeholder="Issue title"
 
-placeholder="Issue title"
+                    />
 
-value={form.title}
 
-onChange={handleChange}
 
-/>
+                    <label>
+                        Description
+                    </label>
 
 
+                    <textarea
 
-<textarea
+                        value={description}
 
-name="description"
+                        onChange={
+                            e =>
+                                setDescription(
+                                    e.target.value
+                                )
+                        }
 
-placeholder="Description"
+                        placeholder="Describe the issue"
 
-value={form.description}
+                    />
 
-onChange={handleChange}
 
-/>
 
+                    <label>
+                        Priority
+                    </label>
 
 
-<select
+                    <select
 
-name="status"
+                        value={priority}
 
-value={form.status}
+                        onChange={
+                            e =>
+                                setPriority(
+                                    e.target.value
+                                )
+                        }
 
-onChange={handleChange}
+                    >
 
->
+                        <option>
+                            Urgent
+                        </option>
 
+                        <option>
+                            High
+                        </option>
 
-<option>
-Todo
-</option>
+                        <option>
+                            Medium
+                        </option>
 
+                        <option>
+                            Low
+                        </option>
 
-<option>
-In Progress
-</option>
 
+                    </select>
 
-<option>
-In Review
-</option>
 
 
-<option>
-Done
-</option>
+                    <label>
+                        Status
+                    </label>
 
 
-</select>
+                    <select
 
+                        value={status}
 
+                        onChange={
+                            e =>
+                                setStatus(
+                                    e.target.value
+                                )
+                        }
 
+                    >
 
+                        <option>
+                            Backlog
+                        </option>
 
-<select
+                        <option>
+                            Todo
+                        </option>
 
-name="priority"
+                        <option>
+                            In Progress
+                        </option>
 
-value={form.priority}
 
-onChange={handleChange}
+                    </select>
 
->
 
 
-<option>
-Low
-</option>
+                    <div>
 
 
-<option>
-Medium
-</option>
+                        <button
 
+                            type="button"
 
-<option>
-High
-</option>
+                            onClick={onClose}
 
+                        >
 
-<option>
-Urgent
-</option>
+                            Cancel
 
+                        </button>
 
-</select>
 
 
+                        <button
 
+                            type="submit"
 
+                            disabled={loading}
 
-<input
+                        >
 
-type="date"
+                            {
+                                loading
+                                    ?
+                                    "Creating..."
+                                    :
+                                    "Create Issue"
+                            }
 
-name="due_date"
 
-value={form.due_date}
+                        </button>
 
-onChange={handleChange}
 
-/>
+                    </div>
 
 
+                </form>
 
 
-<div>
+            </div>
 
 
-<button
+        </div>
 
-type="button"
-
-onClick={onClose}
-
->
-
-Cancel
-
-</button>
-
-
-
-<button
-
-type="submit"
-
-className="primary-button"
-
->
-
-Create Issue
-
-</button>
-
-
-</div>
-
-
-
-</form>
-
-
-</div>
-
-
-</div>
-
-);
+    );
 
 }

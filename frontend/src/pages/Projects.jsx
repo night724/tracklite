@@ -11,80 +11,79 @@ import CreateProjectModal from "../components/CreateProjectModal";
 
 
 
-export default function Projects(){
+export default function Projects() {
 
 
-    const [projects,setProjects] =
-        useState([]);
+    const [projects, setProjects] = useState([]);
 
+    const [search, setSearch] = useState("");
 
-    const [search,setSearch] =
-        useState("");
+    const [filter, setFilter] = useState("all");
 
-
-    const [showModal,setShowModal] =
-        useState(false);
+    const [showModal, setShowModal] = useState(false);
 
 
 
-    async function loadProjects(){
 
-        try{
+    async function loadProjects() {
 
-            const response =
-                await api.get(
-                    "/projects"
-                );
+        try {
+
+            const res =
+                await api.get("/projects");
 
 
-            setProjects(
-                response.data
-            );
+            setProjects(res.data);
 
 
         }
-        catch(error){
+        catch (error) {
 
-            console.error(
-                "LOAD PROJECTS ERROR",
-                error
-            );
+            console.error(error);
 
         }
+
 
     }
 
 
 
-
-
-    useEffect(()=>{
+    useEffect(() => {
 
         loadProjects();
 
-    },[]);
+    }, []);
 
 
 
 
 
 
-    const filteredProjects =
-        projects.filter(project=>{
+    const visibleProjects =
+        projects.filter(project => {
 
 
-            const name =
+            const matchName =
                 project.name
-                ?.toLowerCase()
-                || "";
+                    .toLowerCase()
+                    .includes(
+                        search.toLowerCase()
+                    );
 
 
-            return name.includes(
-                search.toLowerCase()
-            );
+
+            const matchStatus =
+                filter === "all"
+                ||
+                project.status === filter;
+
+
+
+            return matchName && matchStatus;
 
 
         });
+
 
 
 
@@ -97,7 +96,7 @@ export default function Projects(){
 
 
 
-            <div className="projects-header">
+            <header className="projects-header">
 
 
                 <div>
@@ -108,9 +107,8 @@ export default function Projects(){
 
 
                     <p>
-                        Manage your team's projects
+                        Organize and manage your team's work
                     </p>
-
 
                 </div>
 
@@ -120,7 +118,7 @@ export default function Projects(){
 
                     className="primary-button"
 
-                    onClick={()=>
+                    onClick={() =>
                         setShowModal(true)
                     }
 
@@ -131,24 +129,25 @@ export default function Projects(){
                 </button>
 
 
-            </div>
+
+            </header>
 
 
 
 
 
-            <div className="project-toolbar">
+
+            <div className="project-controls">
 
 
                 <input
 
-                    placeholder="Search projects..."
+                    placeholder="🔍 Search projects..."
 
                     value={search}
 
                     onChange={
-                        e =>
-                        setSearch(
+                        e => setSearch(
                             e.target.value
                         )
                     }
@@ -156,9 +155,40 @@ export default function Projects(){
                 />
 
 
+
+
+                <select
+
+                    value={filter}
+
+                    onChange={
+                        e => setFilter(
+                            e.target.value
+                        )
+                    }
+
+                >
+
+
+                    <option value="all">
+                        All Projects
+                    </option>
+
+
+                    <option value="active">
+                        Active
+                    </option>
+
+
+                    <option value="completed">
+                        Completed
+                    </option>
+
+
+                </select>
+
+
             </div>
-
-
 
 
 
@@ -169,8 +199,7 @@ export default function Projects(){
 
 
                 {
-                    filteredProjects.map(project=>(
-
+                    visibleProjects.map(project => (
 
                         <ProjectCard
 
@@ -182,11 +211,36 @@ export default function Projects(){
 
 
                     ))
+
                 }
 
 
             </div>
 
+
+
+
+
+
+            {
+                visibleProjects.length === 0 &&
+
+
+                <div className="empty-project">
+
+                    <h2>
+                        No projects found
+                    </h2>
+
+
+                    <p>
+                        Create your first project
+                    </p>
+
+
+                </div>
+
+            }
 
 
 
@@ -200,13 +254,12 @@ export default function Projects(){
 
                 <CreateProjectModal
 
-
-                    onClose={()=>
+                    onClose={() =>
                         setShowModal(false)
                     }
 
 
-                    onCreated={()=>{
+                    onCreated={() => {
 
                         setShowModal(false);
 
@@ -222,9 +275,10 @@ export default function Projects(){
 
 
 
-
         </div>
 
+
     );
+
 
 }

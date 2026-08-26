@@ -13,20 +13,49 @@ export default function ProjectCard({
 
         <div className="project-card">
 
-            <div className="project-icon">
 
-                {project.name
-                    ?.charAt(0)
-                    .toUpperCase()
-                }
+
+            <div className="project-top">
+
+
+                <div
+
+                    className="project-icon"
+
+                    style={{
+                        background: project.color
+                    }}
+
+                >
+
+                    {
+                        project.name
+                            .charAt(0)
+                            .toUpperCase()
+                    }
+
+
+                </div>
+
+
+
+                <button className="menu-button">
+
+                    ⋮
+
+                </button>
+
 
             </div>
 
+
+
+
+
             <h2>
-
                 {project.name}
-
             </h2>
+
 
             <p>
 
@@ -37,76 +66,93 @@ export default function ProjectCard({
 
             </p>
 
-            <div className="project-info">
 
 
-                <span>
-
-                    📌
-
-                    {
-                        project.issue_count ||
-                        0
-                    }
-
-                    Issues
-
-                </span>
-
-                <span>
-
-                    👥
-
-                    {
-                        project.member_count ||
-                        0
-                    }
-
-                    Members
-
-                </span>
-
-            </div>
-
-            <div className="progress-container">
 
 
-                <div
+            <div className="project-stats">
 
-                    className="progress-bar"
 
-                    style={{
+                <div>
 
-                        width:
-                            `${project.progress ||
-                            0
-                            }%`
+                    <strong>
 
-                    }}
+                        {project.issue_count || 0}
 
-                />
+                    </strong>
+
+                    <span>
+                        Issues
+                    </span>
+
+                </div>
+
+
+
+
+                <div>
+
+                    <strong>
+
+                        {project.member_count || 0}
+
+                    </strong>
+
+                    <span>
+                        Members
+                    </span>
+
+                </div>
+
 
             </div>
 
 
-            <small>
 
-                {
-                    project.progress ||
-                    0
-                }%
 
-                completed
 
-            </small>
+
+
+            <div className="progress-area">
+
+
+                <div className="progress-background">
+
+
+                    <div
+
+                        className="progress-value"
+
+                        style={{
+                            width:
+                                `${project.progress || 0}%`
+                        }}
+
+                    >
+
+
+                    </div>
+
+
+                </div>
+
+
+                <span>
+
+                    {project.progress || 0}% completed
+
+                </span>
+
+
+            </div>
 
             <Link
-
-                className="project-button"
 
                 to={
                     `/projects/${project.id}/dashboard`
                 }
+
+                className="open-project"
 
             >
 
@@ -120,5 +166,6 @@ export default function ProjectCard({
         </div>
 
     );
+
 
 }

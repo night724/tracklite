@@ -34,11 +34,11 @@ export default function IssueDetail() {
     const [title, setTitle] =
         useState("");
 
+    const [comments, setComments] =
+        useState([]);
 
     const [comment, setComment] =
         useState("");
-
-
 
     async function loadIssue() {
 
@@ -72,13 +72,97 @@ export default function IssueDetail() {
 
     useEffect(() => {
 
+
         loadIssue();
+
+        loadComments();
+
 
     }, [issueId]);
 
+    async function loadComments() {
+
+        try {
+
+
+            const response =
+                await api.get(
+                    `/comments/issue/${issueId}`
+                );
+
+
+            setComments(
+                response.data
+            );
+
+
+        }
+        catch (error) {
+
+
+            console.error(
+                "LOAD COMMENTS ERROR:",
+                error
+            );
+
+
+        }
+
+    }
+
+    async function addComment() {
+
+
+        if (!comment.trim()) {
+
+            return;
+
+        }
 
 
 
+        try {
+
+
+            await api.post(
+
+                "/comments",
+
+                {
+                    issue_id: issueId,
+                    body: comment
+                }
+
+            );
+
+
+
+            setComment("");
+
+
+
+            await loadComments();
+
+
+
+        }
+        catch (error) {
+
+
+            console.error(
+
+                "ADD COMMENT ERROR:",
+
+                error.response?.data ||
+                error
+
+            );
+
+
+        }
+
+
+    }
 
     async function saveTitle() {
 
@@ -109,20 +193,12 @@ export default function IssueDetail() {
 
     }
 
-
-
-
-
-
-
     async function updateProperty(
         field,
         value
     ) {
 
-
         try {
-
 
             await api.patch(
                 `/issues/${issueId}`,
@@ -131,9 +207,7 @@ export default function IssueDetail() {
                 }
             );
 
-
             await loadIssue();
-
 
         } catch (error) {
 
@@ -141,78 +215,33 @@ export default function IssueDetail() {
 
         }
 
-
     }
 
+    useEffect(() => {
 
 
+        loadIssue();
+
+        loadComments();
 
 
-
-
-    async function addComment() {
-
-
-        if (!comment.trim())
-            return;
-
-
-
-        try {
-
-
-            await api.post(
-                `/comments`,
-                {
-                    issue_id: issueId,
-                    body: comment
-                }
-            );
-
-
-            setComment("");
-
-            await loadIssue();
-
-
-
-        } catch (error) {
-
-            console.error(
-                "COMMENT ERROR",
-                error
-            );
-
-        }
-
-    }
-
-
-
-
-
+    }, [issueId]);
 
     async function deleteIssue() {
-
 
         const ok =
             window.confirm(
                 "Delete this issue?"
             );
 
-
         if (!ok)
             return;
 
-
-
         try {
-
 
             await api.delete(
                 `/issues/${issueId}`
             );
-
 
             navigate(
                 `/projects/${projectId}/issues`
@@ -394,19 +423,47 @@ export default function IssueDetail() {
                     </section>
 
 
-
-
-
-
-
-
                     <section>
 
-
                         <h2>
-                            Comment
+                            Comments
                         </h2>
 
+                        {
+                            comments.map(item => (
+
+                                <div
+                                    key={item.id}
+                                    className="comment"
+                                >
+
+                                    <strong>
+
+                                        {item.name}
+
+                                    </strong>
+
+                                    <p>
+
+                                        {item.body}
+
+                                    </p>
+
+                                    <small>
+
+                                        {
+                                            new Date(
+                                                item.created_at
+                                            )
+                                                .toLocaleString()
+                                        }
+
+                                    </small>
+
+                                </div>
+
+                            ))
+                        }
 
                         <textarea
 
@@ -419,12 +476,9 @@ export default function IssueDetail() {
                                     )
                             }
 
-
                             placeholder="Write a comment..."
 
                         />
-
-
 
                         <button
 
@@ -434,14 +488,11 @@ export default function IssueDetail() {
 
                         >
 
-                            Comment
+                            Add Comment
 
                         </button>
 
-
                     </section>
-
-
 
                 </main>
 

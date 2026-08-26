@@ -64,27 +64,248 @@ button {
     background: #f1f5f9;
 }
 
-.projects-title {
-    margin-top: 30px;
-    margin-bottom: 10px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: #94a3b8;
+.projects-page {
+
+    padding: 32px;
+
+    background: #f8fafc;
+
+    min-height: 100vh;
+
 }
 
-.projects {
+
+
+.projects-header {
+
     display: flex;
-    flex-direction: column;
-    gap: 5px;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 30px;
+
 }
 
-.project-color {
-    display: inline-block;
-    width: 8px;
+
+
+.projects-header h1 {
+
+    font-size: 32px;
+
+}
+
+
+
+.projects-header p {
+
+    color: #64748b;
+
+}
+
+
+
+
+.project-controls {
+
+    display: flex;
+
+    gap: 15px;
+
+    margin-bottom: 30px;
+
+}
+
+
+
+.project-controls input,
+.project-controls select {
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+    border: 1px solid #ddd;
+
+    background: white;
+
+}
+
+
+
+
+.project-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fill, minmax(320px, 1fr));
+
+    gap: 25px;
+
+}
+
+
+
+
+.project-card {
+
+    background: white;
+
+    padding: 25px;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 5px 20px rgba(0, 0, 0, .05);
+
+}
+
+
+
+
+.project-top {
+
+    display: flex;
+
+    justify-content: space-between;
+
+}
+
+
+
+
+.project-icon {
+
+    width: 50px;
+
+    height: 50px;
+
+    border-radius: 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: white;
+
+    font-size: 22px;
+
+    font-weight: bold;
+
+}
+
+
+
+
+.project-card p {
+
+    color: #64748b;
+
+}
+
+
+
+.project-stats {
+
+    display: flex;
+
+    gap: 40px;
+
+    margin: 25px 0;
+
+}
+
+
+
+.project-stats div {
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+
+
+.project-stats span {
+
+    color: #64748b;
+
+    font-size: 13px;
+
+}
+
+
+
+
+.progress-background {
+
     height: 8px;
-    border-radius: 50%;
-    margin-right: 8px;
+
+    background: #e5e7eb;
+
+    border-radius: 20px;
+
+}
+
+
+
+.progress-value {
+
+    height: 100%;
+
+    background: #635bff;
+
+    border-radius: 20px;
+
+}
+
+
+
+.progress-area span {
+
+    font-size: 13px;
+
+    color: #64748b;
+
+}
+
+
+
+.open-project {
+
+    display: block;
+
+    text-align: center;
+
+    margin-top: 20px;
+
+    padding: 12px;
+
+    background: #635bff;
+
+    color: white;
+
+    border-radius: 10px;
+
+    text-decoration: none;
+
+}
+
+
+
+.empty-project {
+
+    text-align: center;
+
+    padding: 80px;
+
+    color: #64748b;
+
 }
 
 .blue {

@@ -19,7 +19,9 @@ router.post(
     authenticate,
     async (req, res) => {
 
+
         try {
+
 
             const {
 
@@ -28,6 +30,8 @@ router.post(
                 body
 
             } = req.body;
+
+
 
             if (!body) {
 
@@ -39,24 +43,27 @@ router.post(
 
             }
 
+
+
+
             const result = await db.query(
 
                 `
-                INSERT INTO comments
+INSERT INTO comments
 
-                (
-                issue_id,
-                user_id,
-                body
-                )
+(
+issue_id,
+user_id,
+body
+)
 
-                VALUES
+VALUES
 
-                ($1,$2,$3)
+($1,$2,$3)
 
-                RETURNING *
+RETURNING *
 
-                `,
+`,
 
                 [
 
@@ -68,14 +75,20 @@ router.post(
 
                 ]
 
+
             );
+
+
 
             res.json(
                 result.rows[0]
             );
 
+
+
         }
         catch (error) {
+
 
             console.error(
                 "CREATE COMMENT ERROR:",
@@ -89,42 +102,54 @@ router.post(
 
             });
 
+
         }
 
+
+
     });
+
+
+
 
 // =======================
 // GET COMMENTS
 // =======================
+
 
 router.get(
     "/issue/:issueId",
     authenticate,
     async (req, res) => {
 
+
         try {
+
 
             const result = await db.query(
 
                 `
 
-                SELECT
+SELECT
 
-                comments.*,
+comments.*,
 
-                users.name
+users.name
 
-                FROM comments
+FROM comments
 
-                JOIN users
+JOIN users
 
-                ON users.id = comments.user_id
+ON users.id = comments.user_id
 
-                WHERE issue_id=$1
 
-                ORDER BY created_at ASC
+WHERE issue_id=$1
 
-                `,
+
+ORDER BY created_at ASC
+
+
+`,
 
                 [
 
@@ -132,11 +157,16 @@ router.get(
 
                 ]
 
+
             );
+
+
 
             res.json(
                 result.rows
             );
+
+
 
         }
         catch (error) {
@@ -144,13 +174,19 @@ router.get(
 
             console.error(error);
 
+
             res.status(500).json({
 
                 message: "Server error"
 
             });
+
+
         }
 
+
     });
+
+
 
 export default router;

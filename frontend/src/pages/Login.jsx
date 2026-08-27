@@ -39,7 +39,7 @@ export default function Login() {
 
             await login(email, password);
 
-            navigate("/projects/1/dashboard");
+            navigate("/projects");
 
         } catch (error) {
 

@@ -1,16 +1,9 @@
-/* =====================================================
-   TRACKLITE GLOBAL STYLE
-===================================================== */
-
 
 * {
     box-sizing: border-box;
 }
-
-
 html,
 body {
-
     margin: 0;
 
     padding: 0;
@@ -27,8 +20,6 @@ body {
 
 }
 
-
-
 a {
 
     text-decoration: none;
@@ -36,9 +27,6 @@ a {
     color: inherit;
 
 }
-
-
-
 button {
 
     cursor: pointer;
@@ -46,9 +34,6 @@ button {
     font-family: inherit;
 
 }
-
-
-
 input,
 textarea,
 select {
@@ -67,28 +52,18 @@ select {
 
 }
 
-
-
 input:focus,
 textarea:focus,
 select:focus {
-
     border-color: #6366f1;
-
     box-shadow:
         0 0 0 3px rgba(99, 102, 241, .15);
 
 }
 
-
-
-
-
 /* =====================================================
    APP LAYOUT
 ===================================================== */
-
-
 .app-layout {
 
 
@@ -99,14 +74,8 @@ select:focus {
 
 }
 
-
-
 .main-area {
-
-
     margin-left: 260px;
-
-
     width:
 
         calc(100% - 260px);
